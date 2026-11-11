@@ -35,3 +35,6 @@ curl -X POST http://localhost:3000/order -H "Content-Type: application/json" \
  -d '{"order":{"book_name":"Harry Potter","author":"J.K Rowling","buyer":"Fikri Helmi Setiawan","shipping_address":"Jl. Batik Kumeli no 50 Bandung"}}'
 ```
 (Pada Istio gunakan alamat `INGRESS` dari `kubectl -n istio-system get svc istio-ingressgateway` dengan path `/order`.)
+
+## Bukti service berjalan (Kubernetes + Istio)
+![Output order-service dan shipping-service](screenshots/outputduaservice.png)
