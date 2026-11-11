@@ -1,0 +1,51 @@
+# ---------- PersistentVolume ----------
+# Versi API untuk object PersistentVolume
+apiVersion: v1
+# Jenis object yang dibuat
+kind: PersistentVolume
+# Metadata object
+metadata:
+  # Nama PersistentVolume
+  name: mongo-pv
+  # Label untuk mengelompokkan object milik MongoDB
+  labels:
+    app: mongo
+# Spesifikasi PersistentVolume
+spec:
+  # Nama StorageClass manual agar PV ini hanya dipakai oleh mongo-pvc
+  storageClassName: manual
+  # Kapasitas penyimpanan yang disediakan
+  capacity:
+    storage: 1Gi
+  # Volume dapat di-mount read-write oleh satu node
+  accessModes:
+    - ReadWriteOnce
+  # Data tetap disimpan meskipun PVC dihapus
+  persistentVolumeReclaimPolicy: Retain
+  # Menyimpan data di direktori node minikube
+  hostPath:
+    path: /data/mongo
+---
+# ---------- PersistentVolumeClaim ----------
+# Versi API untuk object PersistentVolumeClaim
+apiVersion: v1
+# Jenis object yang dibuat
+kind: PersistentVolumeClaim
+# Metadata object
+metadata:
+  # Nama PersistentVolumeClaim
+  name: mongo-pvc
+  # Label untuk mengelompokkan object milik MongoDB
+  labels:
+    app: mongo
+# Spesifikasi PersistentVolumeClaim
+spec:
+  # Menggunakan StorageClass yang sama dengan mongo-pv
+  storageClassName: manual
+  # Mode akses yang diminta
+  accessModes:
+    - ReadWriteOnce
+  # Besar penyimpanan yang diminta dari PV
+  resources:
+    requests:
+      storage: 1Gi

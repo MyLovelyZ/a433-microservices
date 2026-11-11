@@ -1,0 +1,51 @@
+# Versi API untuk object Deployment
+apiVersion: apps/v1
+# Jenis object yang dibuat
+kind: Deployment
+# Metadata object
+metadata:
+  # Nama Deployment frontend
+  name: karsajobs-ui
+  # Label untuk mengelompokkan object milik frontend
+  labels:
+    app: karsajobs-ui
+# Spesifikasi Deployment
+spec:
+  # Jumlah Pod frontend yang dijalankan
+  replicas: 1
+  # Pod yang dikelola Deployment ini dipilih berdasarkan label
+  selector:
+    matchLabels:
+      app: karsajobs-ui
+  # Template Pod frontend
+  template:
+    metadata:
+      # Label Pod (harus sama dengan selector)
+      labels:
+        app: karsajobs-ui
+    spec:
+      containers:
+        # Nama container
+        - name: karsajobs-ui
+          # Image frontend dari GitHub Packages
+          image: ghcr.io/mylovelyz/karsajobs-ui:latest
+          # Selalu menarik image terbaru dari registry
+          imagePullPolicy: Always
+          # Port yang dibuka container (vue-cli-service serve --port 8000)
+          ports:
+            - containerPort: 8000
+          # Batas penggunaan resource container
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          # Pod dianggap siap menerima trafik bila halaman utama merespons
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 20
+            periodSeconds: 10

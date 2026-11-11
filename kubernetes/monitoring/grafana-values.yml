@@ -1,0 +1,60 @@
+# Values untuk helm chart grafana/grafana
+# Pemasangan:
+#   helm repo add grafana https://grafana.github.io/helm-charts
+#   kubectl apply -f grafana-dashboard-configmap.yml
+#   helm install grafana grafana/grafana -n monitoring -f grafana-values.yml
+# Mengakses Grafana:
+#   kubectl port-forward -n monitoring svc/grafana 13000:80  -> buka http://localhost:13000
+# Password admin:
+#   kubectl get secret -n monitoring grafana -o jsonpath="{.data.admin-password}" | base64 -d
+
+# Service Grafana bertipe ClusterIP (diakses melalui port-forward)
+service:
+  type: ClusterIP
+
+# Penyimpanan data Grafana menggunakan PVC agar dashboard tidak hilang saat Pod restart
+persistence:
+  enabled: true
+  size: 1Gi
+
+# Init container chown tidak diperlukan karena volume hostpath minikube sudah dapat ditulis oleh Grafana
+initChownData:
+  enabled: false
+
+# Data source Prometheus yang otomatis ditambahkan saat Grafana berjalan
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        # Alamat Service Prometheus server di namespace monitoring
+        url: http://prometheus-server.monitoring.svc.cluster.local
+        access: proxy
+        isDefault: true
+
+# Provider untuk memuat dashboard secara otomatis
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+      - name: default
+        orgId: 1
+        folder: ""
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/default
+
+# Dashboard dimuat dari ConfigMap grafana-dashboard-kubernetes (grafana-dashboard-configmap.yml),
+# yaitu template "Kubernetes cluster monitoring (via Prometheus)" (ID 315) yang telah disesuaikan
+dashboardsConfigMaps:
+  default: grafana-dashboard-kubernetes
+
+# Konfigurasi tambahan grafana.ini
+grafana.ini:
+  # Akses anonim read-only (Viewer) untuk keperluan demo lokal / screenshot dashboard
+  auth.anonymous:
+    enabled: true
+    org_role: Viewer

@@ -1,0 +1,27 @@
+# Versi API untuk object Service
+apiVersion: v1
+# Jenis object yang dibuat
+kind: Service
+# Metadata object
+metadata:
+  # Nama Service frontend
+  name: karsajobs-ui-service
+  # Label untuk mengelompokkan object milik frontend
+  labels:
+    app: karsajobs-ui
+# Spesifikasi Service
+spec:
+  # NodePort agar frontend dapat diakses dari browser
+  type: NodePort
+  # Meneruskan trafik ke Pod yang memiliki label app: karsajobs-ui
+  selector:
+    app: karsajobs-ui
+  # Port yang dibuka oleh Service
+  ports:
+    - name: http
+      # Port Service di dalam cluster
+      port: 8000
+      # Port container frontend
+      targetPort: 8000
+      # Custom NodePort untuk mengakses frontend
+      nodePort: 30000

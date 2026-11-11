@@ -1,0 +1,71 @@
+# Versi API untuk object Deployment
+apiVersion: apps/v1
+# Jenis object yang dibuat
+kind: Deployment
+# Metadata object
+metadata:
+  # Nama Deployment backend
+  name: karsajobs
+  # Label untuk mengelompokkan object milik backend
+  labels:
+    app: karsajobs
+# Spesifikasi Deployment
+spec:
+  # Jumlah Pod backend yang dijalankan
+  replicas: 1
+  # Pod yang dikelola Deployment ini dipilih berdasarkan label
+  selector:
+    matchLabels:
+      app: karsajobs
+  # Template Pod backend
+  template:
+    metadata:
+      # Label Pod (harus sama dengan selector)
+      labels:
+        app: karsajobs
+    spec:
+      containers:
+        # Nama container
+        - name: karsajobs
+          # Image backend dari GitHub Packages
+          image: ghcr.io/mylovelyz/karsajobs:latest
+          # Selalu menarik image terbaru dari registry
+          imagePullPolicy: Always
+          # Port yang dibuka container
+          ports:
+            - containerPort: 8080
+          # Environment variable untuk konfigurasi aplikasi
+          env:
+            # Port aplikasi backend
+            - name: APP_PORT
+              value: "8080"
+            # Host MongoDB diambil dari nama MongoDB Service
+            - name: MONGO_HOST
+              value: mongo-service
+            # Username MongoDB diambil dari MongoDB Secret
+            - name: MONGO_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: MONGO_ROOT_USERNAME
+            # Password MongoDB diambil dari MongoDB Secret
+            - name: MONGO_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: MONGO_ROOT_PASSWORD
+          # Batas penggunaan resource container
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+          # Pod dianggap siap menerima trafik bila endpoint /health merespons
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10

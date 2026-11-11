@@ -1,0 +1,18 @@
+# Versi API untuk object ConfigMap
+apiVersion: v1
+# Jenis object yang dibuat
+kind: ConfigMap
+# Metadata object
+metadata:
+  # Nama ConfigMap
+  name: mongo-config
+  # Label untuk mengelompokkan object milik MongoDB
+  labels:
+    app: mongo
+# Data konfigurasi yang diperlakukan sebagai berkas mongo.conf
+data:
+  mongo.conf: |
+    # Konfigurasi storage MongoDB
+    storage:
+      # Lokasi penyimpanan data MongoDB di dalam container
+      dbPath: /data/db

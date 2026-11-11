@@ -1,0 +1,27 @@
+# Versi API untuk object Service
+apiVersion: v1
+# Jenis object yang dibuat
+kind: Service
+# Metadata object
+metadata:
+  # Nama Service backend
+  name: karsajobs-service
+  # Label untuk mengelompokkan object milik backend
+  labels:
+    app: karsajobs
+# Spesifikasi Service
+spec:
+  # NodePort agar backend dapat diakses dari luar cluster (dipanggil oleh browser)
+  type: NodePort
+  # Meneruskan trafik ke Pod yang memiliki label app: karsajobs
+  selector:
+    app: karsajobs
+  # Port yang dibuka oleh Service
+  ports:
+    - name: http
+      # Port Service di dalam cluster
+      port: 8080
+      # Port container backend
+      targetPort: 8080
+      # Custom NodePort yang dipakai pada VUE_APP_BACKEND di frontend
+      nodePort: 30001

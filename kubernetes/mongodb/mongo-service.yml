@@ -1,0 +1,25 @@
+# Versi API untuk object Service
+apiVersion: v1
+# Jenis object yang dibuat
+kind: Service
+# Metadata object
+metadata:
+  # Nama Service; nama ini dipakai backend sebagai MONGO_HOST
+  name: mongo-service
+  # Label untuk mengelompokkan object milik MongoDB
+  labels:
+    app: mongo
+# Spesifikasi Service
+spec:
+  # Headless Service (tanpa ClusterIP) untuk StatefulSet MongoDB
+  clusterIP: None
+  # Meneruskan trafik ke Pod yang memiliki label app: mongo
+  selector:
+    app: mongo
+  # Port yang dibuka oleh Service
+  ports:
+    - name: mongo
+      # Port Service
+      port: 27017
+      # Port container MongoDB
+      targetPort: 27017

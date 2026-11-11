@@ -1,0 +1,7 @@
+Backend (karsajobs):
+https://github.com/users/MyLovelyZ/packages/container/package/karsajobs
+Image: ghcr.io/mylovelyz/karsajobs:latest
+
+Frontend (karsajobs-ui):
+https://github.com/users/MyLovelyZ/packages/container/package/karsajobs-ui
+Image: ghcr.io/mylovelyz/karsajobs-ui:latest

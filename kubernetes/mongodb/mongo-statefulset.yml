@@ -1,0 +1,82 @@
+# Versi API untuk object StatefulSet
+apiVersion: apps/v1
+# Jenis object yang dibuat
+kind: StatefulSet
+# Metadata object
+metadata:
+  # Nama StatefulSet
+  name: mongo
+  # Label untuk mengelompokkan object milik MongoDB
+  labels:
+    app: mongo
+# Spesifikasi StatefulSet
+spec:
+  # Nama Service (headless) yang mengatur identitas jaringan Pod
+  serviceName: mongo-service
+  # Jumlah Pod MongoDB yang dijalankan
+  replicas: 1
+  # Pod yang dikelola StatefulSet ini dipilih berdasarkan label
+  selector:
+    matchLabels:
+      app: mongo
+  # Template Pod MongoDB
+  template:
+    metadata:
+      # Label Pod (harus sama dengan selector)
+      labels:
+        app: mongo
+    spec:
+      containers:
+        # Nama container
+        - name: mongo
+          # Image MongoDB versi 4.4 (kompatibel dengan mongo-driver v1.4 yang dipakai backend)
+          image: mongo:4.4
+          # Menjalankan MongoDB dengan berkas konfigurasi dari ConfigMap
+          args: ["--config", "/config/mongo.conf"]
+          # Port yang dibuka container
+          ports:
+            - containerPort: 27017
+              name: mongo
+          # Environment variable untuk membuat user root dari berkas Secret
+          env:
+            # Username root dibaca dari berkas Secret yang di-mount
+            - name: MONGO_INITDB_ROOT_USERNAME_FILE
+              value: /etc/mongo-credentials/MONGO_ROOT_USERNAME
+            # Password root dibaca dari berkas Secret yang di-mount
+            - name: MONGO_INITDB_ROOT_PASSWORD_FILE
+              value: /etc/mongo-credentials/MONGO_ROOT_PASSWORD
+          # Batas penggunaan resource container
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          # Daftar volume yang di-mount ke container
+          volumeMounts:
+            # Persistent Volume untuk menyimpan data MongoDB
+            - name: mongo-data
+              mountPath: /data/db
+            # ConfigMap berisi berkas mongo.conf
+            - name: mongo-config
+              mountPath: /config
+              readOnly: true
+            # Secret berisi kredensial MongoDB
+            - name: mongo-credentials
+              mountPath: /etc/mongo-credentials
+              readOnly: true
+      # Definisi volume yang digunakan Pod
+      volumes:
+        # Volume dari PersistentVolumeClaim mongo-pvc
+        - name: mongo-data
+          persistentVolumeClaim:
+            claimName: mongo-pvc
+        # Volume dari ConfigMap mongo-config
+        - name: mongo-config
+          configMap:
+            name: mongo-config
+        # Volume dari Secret mongo-secret
+        - name: mongo-credentials
+          secret:
+            secretName: mongo-secret

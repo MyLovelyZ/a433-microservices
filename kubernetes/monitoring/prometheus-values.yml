@@ -1,0 +1,31 @@
+# Values untuk helm chart prometheus-community/prometheus
+# Pemasangan:
+#   helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+#   helm install prometheus prometheus-community/prometheus -n monitoring --create-namespace -f prometheus-values.yml
+
+# Alertmanager tidak dibutuhkan untuk proyek ini, dinonaktifkan agar lebih ringan
+alertmanager:
+  enabled: false
+
+# Pushgateway tidak dibutuhkan untuk proyek ini, dinonaktifkan agar lebih ringan
+prometheus-pushgateway:
+  enabled: false
+
+# Konfigurasi Prometheus server
+server:
+  # Interval scrape 15 detik agar query rate(...[1m]) pada dashboard selalu memiliki cukup sampel
+  global:
+    scrape_interval: 15s
+    evaluation_interval: 15s
+  # Menyimpan data metrik selama 7 hari
+  retention: 7d
+  # Penyimpanan data Prometheus menggunakan PVC dari StorageClass default minikube
+  persistentVolume:
+    enabled: true
+    size: 2Gi
+
+# kube-state-metrics (metrik object Kubernetes) dan node-exporter (metrik node) tetap aktif
+kube-state-metrics:
+  enabled: true
+prometheus-node-exporter:
+  enabled: true
