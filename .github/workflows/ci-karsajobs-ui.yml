@@ -15,7 +15,7 @@ jobs:
     steps:
       # Mengambil source code dari repository
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # Menginstal hadolint (binary resmi dari GitHub Releases)
       - name: Install hadolint
@@ -39,7 +39,7 @@ jobs:
     steps:
       # Mengambil source code dari repository
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # Build lalu push image menggunakan script build_push_image_karsajobs_ui.sh
       # (GITHUB_TOKEN dipakai sebagai password untuk login ke ghcr.io)
