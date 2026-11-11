@@ -15,7 +15,7 @@ jobs:
     steps:
       # Mengambil source code dari repository
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # Menginstal hadolint (binary resmi dari GitHub Releases)
       - name: Install hadolint
@@ -33,11 +33,11 @@ jobs:
     steps:
       # Mengambil source code dari repository
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # Menyiapkan Go sesuai versi pada go.mod
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: '1.15'
 
@@ -57,7 +57,7 @@ jobs:
     steps:
       # Mengambil source code dari repository
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # Build lalu push image menggunakan script build_push_image_karsajobs.sh
       # (GITHUB_TOKEN dipakai sebagai password untuk login ke ghcr.io)
