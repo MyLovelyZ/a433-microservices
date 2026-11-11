@@ -1,0 +1,35 @@
+# Menggunakan Docker Compose file format versi 3 (memenuhi syarat versi 2 atau lebih)
+version: '3'
+
+# Mendefinisikan service (container) yang akan dijalankan
+services:
+  # Service untuk aplikasi web Node.js/Express
+  item-app:
+    # Menggunakan image item-app yang telah diunggah ke GitHub Packages
+    image: ghcr.io/mylovelyz/item-app:v1
+    # Memberi nama container item-app
+    container_name: item-app
+    # Port mapping: port 80 di host diteruskan ke port 8080 di container
+    ports:
+      - "80:8080"
+    # Memastikan item-app hanya berjalan setelah item-db diluncurkan
+    depends_on:
+      - item-db
+    # Restart policy: container selalu di-restart ketika terhenti
+    restart: always
+
+  # Service untuk database MongoDB
+  item-db:
+    # Menggunakan image mongo versi 3 dari Docker Hub
+    image: mongo:3
+    # Memberi nama container item-db (dipakai sebagai DB_HOST oleh item-app)
+    container_name: item-db
+    # Memakai volume bernama app-db yang di-mount ke /data/db di container agar data persisten
+    volumes:
+      - app-db:/data/db
+    # Restart policy: container selalu di-restart ketika terhenti
+    restart: always
+
+# Mendefinisikan satu buah named volume bernama app-db
+volumes:
+  app-db:
