@@ -1,0 +1,49 @@
+# Pipeline Continuous Integration untuk frontend karsajobs-ui (GitHub Actions)
+name: CI karsajobs-ui
+
+# Pipeline dijalankan setiap ada push ke branch karsajobs-ui
+on:
+  push:
+    branches:
+      - karsajobs-ui
+
+jobs:
+  # Job 1: lint berkas Dockerfile menggunakan hadolint
+  lint-dockerfile:
+    # Runner yang digunakan
+    runs-on: ubuntu-latest
+    steps:
+      # Mengambil source code dari repository
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      # Menginstal hadolint (binary resmi dari GitHub Releases)
+      - name: Install hadolint
+        run: |
+          wget -qO /usr/local/bin/hadolint https://github.com/hadolint/hadolint/releases/download/v2.12.0/hadolint-Linux-x86_64
+          chmod +x /usr/local/bin/hadolint
+
+      # Menjalankan hadolint terhadap berkas Dockerfile
+      - name: Lint Dockerfile
+        run: hadolint Dockerfile
+
+  # Job 2: build dan push Docker image ke GitHub Packages
+  build-app-karsajobs-ui:
+    runs-on: ubuntu-latest
+    # Hanya berjalan bila lint berhasil
+    needs: lint-dockerfile
+    # Memberi izin GITHUB_TOKEN untuk menulis ke GitHub Packages
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      # Mengambil source code dari repository
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      # Build lalu push image menggunakan script build_push_image_karsajobs_ui.sh
+      # (GITHUB_TOKEN dipakai sebagai password untuk login ke ghcr.io)
+      - name: Build and push image
+        env:
+          PASSWORD_GITHUB: ${{ secrets.GITHUB_TOKEN }}
+        run: bash build_push_image_karsajobs_ui.sh
