@@ -1,0 +1,67 @@
+# Docker Compose untuk E-Commerce App (RabbitMQ + order-service + shipping-service)
+# Image diambil dari GitHub Packages (ghcr.io), bukan dari local image
+services:
+  # Message broker RabbitMQ dengan management UI
+  rabbitmq:
+    # Image resmi RabbitMQ versi 3.11 beserta management plugin
+    image: rabbitmq:3.11-management
+    # Nama container
+    container_name: rabbitmq
+    # Port 5672 untuk AMQP, 15672 untuk management UI
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    # Healthcheck agar service lain menunggu sampai RabbitMQ benar-benar siap
+    healthcheck:
+      # Perintah pengecekan status RabbitMQ
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_port_connectivity"]
+      # Jeda antar pengecekan
+      interval: 10s
+      # Batas waktu satu pengecekan
+      timeout: 5s
+      # Jumlah percobaan sebelum dianggap gagal
+      retries: 10
+
+  # Service penerima order (HTTP POST /order) yang mengirim ke queue
+  order-service:
+    # Image dari GitHub Packages
+    image: ghcr.io/mylovelyz/order-service:latest
+    # Nama container
+    container_name: order-service
+    # Mengekspos port 3000 ke host
+    ports:
+      - "3000:3000"
+    # Environment variable aplikasi
+    environment:
+      # Port HTTP order service
+      PORT: "3000"
+      # Alamat RabbitMQ memakai nama service pada jaringan Compose
+      AMQP_URL: "amqp://rabbitmq:5672"
+    # Jalankan setelah RabbitMQ sehat
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    # Restart otomatis bila crash
+    restart: on-failure
+
+  # Service pengonsumsi order dari queue
+  shipping-service:
+    # Image dari GitHub Packages
+    image: ghcr.io/mylovelyz/shipping-service:latest
+    # Nama container
+    container_name: shipping-service
+    # Mengekspos port 3001 ke host
+    ports:
+      - "3001:3001"
+    # Environment variable aplikasi
+    environment:
+      # Port HTTP shipping service
+      PORT: "3001"
+      # Alamat RabbitMQ memakai nama service pada jaringan Compose
+      AMQP_URL: "amqp://rabbitmq:5672"
+    # Jalankan setelah RabbitMQ sehat
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    # Restart otomatis bila crash
+    restart: on-failure

@@ -1,0 +1,53 @@
+# Gateway Istio: pintu masuk trafik HTTP dari luar cluster
+apiVersion: networking.istio.io/v1beta1
+# Jenis resource: Gateway
+kind: Gateway
+metadata:
+  # Nama Gateway
+  name: ecommerce-gateway
+  # Namespace tujuan
+  namespace: ecommerce
+spec:
+  # Menggunakan Istio Ingress Gateway bawaan
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        # Port yang dibuka di gateway
+        number: 80
+        # Nama port
+        name: http
+        # Protokol HTTP
+        protocol: HTTP
+      # Menerima semua host
+      hosts:
+        - "*"
+---
+# VirtualService: aturan routing dari Gateway ke order-service
+apiVersion: networking.istio.io/v1beta1
+# Jenis resource: VirtualService
+kind: VirtualService
+metadata:
+  # Nama VirtualService
+  name: order-service
+  # Namespace tujuan
+  namespace: ecommerce
+spec:
+  # Berlaku untuk semua host
+  hosts:
+    - "*"
+  # Terikat pada Gateway di atas
+  gateways:
+    - ecommerce-gateway
+  http:
+    - match:
+        # Hanya path persis /order
+        - uri:
+            exact: /order
+      route:
+        - destination:
+            # Nama Kubernetes Service order-service
+            host: order-service
+            port:
+              # Port Service order-service
+              number: 3000

@@ -1,0 +1,61 @@
+# Deployment dan Service untuk order-service
+apiVersion: apps/v1
+# Jenis resource: Deployment
+kind: Deployment
+metadata:
+  # Nama Deployment
+  name: order-service
+  # Namespace tujuan
+  namespace: ecommerce
+spec:
+  # Jumlah replika Pod
+  replicas: 1
+  # Selector Pod yang dikelola
+  selector:
+    matchLabels:
+      app: order-service
+  # Template Pod
+  template:
+    metadata:
+      # Label Pod (version dipakai Istio untuk telemetri)
+      labels:
+        app: order-service
+        version: v1
+    spec:
+      containers:
+        # Container aplikasi
+        - name: order-service
+          # Image dari GitHub Packages
+          image: ghcr.io/mylovelyz/order-service:latest
+          # Selalu tarik image terbaru dari registry
+          imagePullPolicy: Always
+          # Port aplikasi
+          ports:
+            - containerPort: 3000
+          # Environment variable aplikasi
+          env:
+            # Port HTTP
+            - name: PORT
+              value: "3000"
+            # Alamat RabbitMQ memakai nama Kubernetes Service
+            - name: AMQP_URL
+              value: "amqp://rabbitmq.ecommerce.svc.cluster.local:5672"
+---
+# Service untuk order-service
+apiVersion: v1
+# Jenis resource: Service
+kind: Service
+metadata:
+  # Nama Service
+  name: order-service
+  # Namespace tujuan
+  namespace: ecommerce
+spec:
+  # Memilih Pod berlabel app=order-service
+  selector:
+    app: order-service
+  ports:
+    # Awalan "http" agar Istio mengenali protokol HTTP
+    - name: http
+      port: 3000
+      targetPort: 3000

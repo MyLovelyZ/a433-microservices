@@ -1,0 +1,7 @@
+Order Service:
+https://github.com/users/MyLovelyZ/packages/container/package/order-service
+Image: ghcr.io/mylovelyz/order-service:latest
+
+Shipping Service:
+https://github.com/users/MyLovelyZ/packages/container/package/shipping-service
+Image: ghcr.io/mylovelyz/shipping-service:latest

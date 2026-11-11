@@ -1,0 +1,68 @@
+# StatefulSet RabbitMQ (dideploy lebih dulu sebelum order & shipping service)
+apiVersion: apps/v1
+# Jenis resource: StatefulSet
+kind: StatefulSet
+metadata:
+  # Nama StatefulSet
+  name: rabbitmq
+  # Namespace tujuan
+  namespace: ecommerce
+spec:
+  # Nama Service yang mengatur identitas Pod
+  serviceName: rabbitmq
+  # Jumlah replika
+  replicas: 1
+  # Selector Pod yang dikelola
+  selector:
+    matchLabels:
+      app: rabbitmq
+  # Template Pod
+  template:
+    metadata:
+      # Label Pod
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+        # Container RabbitMQ
+        - name: rabbitmq
+          # Image RabbitMQ dengan management UI
+          image: rabbitmq:3.11-management
+          # Port yang dibuka container
+          ports:
+            # Port AMQP
+            - name: amqp
+              containerPort: 5672
+            # Port management UI
+            - name: management
+              containerPort: 15672
+          # Pod baru menerima trafik setelah RabbitMQ siap
+          readinessProbe:
+            exec:
+              command: ["rabbitmq-diagnostics", "-q", "check_port_connectivity"]
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+---
+# Service RabbitMQ; nama "rabbitmq" dipakai pada AMQP_URL
+apiVersion: v1
+# Jenis resource: Service
+kind: Service
+metadata:
+  # Nama Service = hostname RabbitMQ di dalam cluster
+  name: rabbitmq
+  # Namespace tujuan
+  namespace: ecommerce
+spec:
+  # Memilih Pod berlabel app=rabbitmq
+  selector:
+    app: rabbitmq
+  ports:
+    # Port AMQP (awalan "tcp" agar Istio memperlakukannya sebagai TCP)
+    - name: tcp-amqp
+      port: 5672
+      targetPort: 5672
+    # Port management UI
+    - name: http-management
+      port: 15672
+      targetPort: 15672

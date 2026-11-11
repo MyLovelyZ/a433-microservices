@@ -1,0 +1,6 @@
+# Jangan menyalin node_modules lokal ke image
+node_modules
+# Jangan menyalin .env lokal (AMQP_URL lokal = localhost)
+.env
+# Jangan menyalin data git
+.git

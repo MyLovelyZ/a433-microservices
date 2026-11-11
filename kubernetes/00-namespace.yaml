@@ -1,0 +1,10 @@
+# Namespace khusus E-Commerce App
+apiVersion: v1
+# Jenis resource: Namespace
+kind: Namespace
+metadata:
+  # Nama namespace
+  name: ecommerce
+  # Label istio-injection=enabled agar sidecar Envoy otomatis disuntikkan ke setiap Pod
+  labels:
+    istio-injection: enabled
